@@ -128,6 +128,7 @@ def main():
 
     # 画像情報Dict生成
     images = {}
+    images_filename = {}
     for image_info in tqdm(json_data['images'], 'Parse Images'):
         image_dict = create_image_dict(
             image_info['file_name'],
@@ -143,6 +144,9 @@ def main():
             segmented,
         )
         images[image_info['id']] = image_dict
+        images_filename[image_info['id']] = os.path.splitext(
+            image_info['file_name']
+        )[0]
 
     # アノテーション情報Dict生成
     for annotation_info in tqdm(json_data['annotations'], 'Parse Annotations'):
@@ -164,8 +168,8 @@ def main():
         image_info['annotation'][
             'object'] = image_info['annotation']['object'] or [None]
 
-        xml_path = os.path.join(output_dirs['Annotations'],
-                                '{}.xml'.format(str(key).zfill(12)))
+        xml_filename = '{}.xml'.format(images_filename[key])
+        xml_path = os.path.join(output_dirs['Annotations'], xml_filename)
         with open(xml_path, 'w') as fp:
             xmltodict.unparse(image_info, fp, full_document=False, pretty=True)
 
